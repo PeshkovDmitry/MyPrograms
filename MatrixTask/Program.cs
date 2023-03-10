@@ -40,8 +40,6 @@ while (pos < rows*cols) {
         // В начальной позиции всегда направление - вперед
         direction = !(matrix[pos] == 0);    
     }
-    // Выводим то, что получилось
-    PrintResult();
     // В зависимости от принятого направления увеличиваем или уменьшаем текущую позицию
     if (direction) {
         pos++;
@@ -50,12 +48,14 @@ while (pos < rows*cols) {
         pos--;
     }
 }
+// Выводим то, что получилось
+PrintResult();
 
    
-// Метод для вывода результата на экран. В позиции pos рисует Х
+// Метод для вывода результата на экран.
 void PrintResult() {
     Console.Clear();
-    Console.Write("Итерация № ");
+    Console.Write("Всего итераций - ");
     Console.WriteLine(count);
     int row = pos/cols;
     int col = pos%cols;
