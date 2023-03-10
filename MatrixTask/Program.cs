@@ -9,17 +9,33 @@ int max = 9;
 // Создаем матрицу
 int[] matrix = new int[rows*cols];
 // Задаем начальное значение
-matrix[0] = 1;
-matrix[10] = 2;
-matrix[20] = 3;
-matrix[30] = 4;
-matrix[40] = 5;
-matrix[50] = 6;
-matrix[60] = 7;
-matrix[70] = 8;
-matrix[80] = 9;
+matrix[0] = 7;
+matrix[7] = 1;
+matrix[10] = 1;
+matrix[11] = 5;
+matrix[12] = 6;
+matrix[15] = 9;
+matrix[18] = 3;
+matrix[22] = 5;
+
+matrix[27] = 1;
+matrix[37] = 2;
+matrix[38] = 4;
+matrix[40] = 7;
+matrix[43] = 9;
+matrix[50] = 8;
+matrix[51] = 6;
+
+matrix[55] = 5;
+matrix[56] = 9;
+matrix[58] = 4;
+matrix[61] = 2;
+matrix[65] = 3;
+matrix[75] = 7;
+matrix[80] = 4;
+
 // Формируем массив с номерами неизменных ячеек
-int[] exeptions = {0,10,20,30,40,50,60,70, 80};
+int[] exeptions = {0,7,10,11,12,15,18,22,27,37,38,40,43,50,51,55,56,58,61,65,75,80};
 // Текущее положение в массиве
 int pos = 0;
 // Направление работы. Вперед - true
@@ -40,6 +56,8 @@ while (pos < rows*cols) {
         // В начальной позиции всегда направление - вперед
         direction = !(matrix[pos] == 0);    
     }
+    // Выводим промежуточный вариант
+    // PrintResult();
     // В зависимости от принятого направления увеличиваем или уменьшаем текущую позицию
     if (direction) {
         pos++;
