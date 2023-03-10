@@ -1,9 +1,6 @@
 ﻿// Программа, которая заполняет матрицу заданного размера целыми числами таким образом,
 // что числа не повторяются ни в строке, ни в столбце, ни в малом квадрате 3х3
 
-using System;
-using System.Threading.Tasks;
-
 // Количество строк в матрице
 int rows = 9;
 // Количество столбцов в матрице
@@ -13,10 +10,17 @@ int max = 9;
 // Создаем матрицу
 int[] matrix = new int[rows*cols];
 // Задаем начальное значение
-// matrix[0] = 1;
-
+matrix[0] = 1;
+matrix[10] = 2;
+matrix[20] = 3;
+matrix[30] = 4;
+matrix[40] = 5;
+matrix[50] = 6;
+matrix[60] = 7;
+matrix[70] = 8;
+matrix[80] = 9;
 // Формируем массив с номерами неизменных ячеек
-int[] exeptions = {};
+int[] exeptions = {0,10,20,30,40,50,60,70,80};
 // Текущее положение в массиве
 int pos = 0;
 // Направление работы. Вперед - true
@@ -36,13 +40,6 @@ while (pos < rows*cols) {
     }
     // Выводим то, что получилось
     PrintResult();
-    var t = Task.Run(async delegate
-        {
-            await Task.Delay(1000);
-            return 42;
-        });
-    t.Wait();
-
     // В зависимости от принятого направления увеличиваем или уменьшаем текущую позицию
     if (direction) {
         pos++;
@@ -60,7 +57,7 @@ while (pos < rows*cols) {
    
 // Метод для вывода результата на экран. В позиции pos рисует Х
 void PrintResult() {
-    // Console.Clear();
+    Console.Clear();
     int row = pos/cols;
     int col = pos%cols;
     for (int i = 0; i < rows; i++) {
@@ -78,45 +75,20 @@ bool CanUse(int num, int pos) {
     int row = pos/cols;
     int col = pos%cols;
     // Проверяем, есть ли такая переменная в текущей строке
-    Console.Write("Проверяем переменную ");
-    Console.Write(num);
-    Console.Write(" в строке: ");
     for (int i = 0; i < cols; i++) {
         int n = row*cols+i;
-        Console.Write(matrix[n]);
-        Console.Write(" ");
         result = result & (num != matrix[n]);
-    }
-    if (result) {
-        Console.WriteLine(" - подходит");
-    }
-    else {
-        Console.WriteLine(" - не подходит");
     }
     // Проверяем, есть ли такая переменная в текущем столбце
     // Проверку выполняем, если по результатам предыдущей проверки результат еще true
-    Console.Write("Проверяем переменную ");
-    Console.Write(num);
-    Console.Write(" в столбце: ");
     if (result) {
         for (int i = 0; i < rows; i++) {
-            int n = i*cols + row;
-            Console.Write(matrix[n]);
-            Console.Write(" ");
+            int n = i*cols + col;
             result = result & (num != matrix[n]);
-        }
-        if (result) {
-            Console.WriteLine(" - подходит");
-        }
-        else {
-            Console.WriteLine(" - не подходит");
         }
     }    
     // Проверяем, есть ли такая переменная в текущем малом квадрате
     // Проверку выполняем, если по результатам предыдущей проверки результат еще true
-    Console.Write("Проверяем переменную ");
-    Console.Write(num);
-    Console.Write(" в малом квадрате: ");
     if (result) {
         // Получаем номер малого квадрата по горизонтали
         int squareCol = col/3;
@@ -126,16 +98,8 @@ bool CanUse(int num, int pos) {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 int n = squareRow * 3 * cols + squareCol * 3 + i*cols + j;
-                Console.Write(matrix[n]);
-                Console.Write(" ");
                 result = result & (num != matrix[n]);
             };
-        }
-        if (result) {
-            Console.WriteLine(" - подходит");
-        }
-        else {
-            Console.WriteLine(" - не подходит");
         }
     }
     return result;
