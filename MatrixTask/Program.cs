@@ -9,17 +9,14 @@ int max = 9;
 // Создаем матрицу
 int[] matrix = new int[rows*cols];
 // Задаем начальное значение
-matrix[0] = 1;
-matrix[10] = 2;
+matrix[8] = 5;
+matrix[13] = 4;
 matrix[20] = 3;
-matrix[30] = 4;
-matrix[40] = 5;
-matrix[50] = 6;
-matrix[60] = 7;
-matrix[70] = 8;
-matrix[80] = 9;
+matrix[46] = 2;
+matrix[72] = 1;
+
 // Формируем массив с номерами неизменных ячеек
-int[] exeptions = {0,10,20,30,40,50,60,70, 80};
+int[] exeptions = {8,13,20,46,72};
 // Текущее положение в массиве
 int pos = 0;
 // Направление работы. Вперед - true
@@ -40,8 +37,8 @@ while (pos < rows*cols) {
         // В начальной позиции всегда направление - вперед
         direction = !(matrix[pos] == 0);    
     }
-    // Выводим то, что получилось
-    PrintResult();
+    // Выводим промежуточный вариант
+    // PrintResult();
     // В зависимости от принятого направления увеличиваем или уменьшаем текущую позицию
     if (direction) {
         pos++;
@@ -50,12 +47,14 @@ while (pos < rows*cols) {
         pos--;
     }
 }
+// Выводим то, что получилось
+PrintResult();
 
    
-// Метод для вывода результата на экран. В позиции pos рисует Х
+// Метод для вывода результата на экран.
 void PrintResult() {
     Console.Clear();
-    Console.Write("Итерация № ");
+    Console.Write("Всего итераций - ");
     Console.WriteLine(count);
     int row = pos/cols;
     int col = pos%cols;
