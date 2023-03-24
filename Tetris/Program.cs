@@ -81,19 +81,18 @@ void Print(int[,] fld, int[,] fg, int xPos, int yPos, int scr, int spd) {
     // Выводим первую строку 
     string str = "┌";
     for(int i = 0; i < fld.GetLength(1); i++) str = str + "─";
-    str = str + "┐" + $" Счет: {scr} Скорость: {spd}";
-    Console.WriteLine(str);
+    str = str + "┐" + $" Счет: {scr} Скорость: {spd} \n";
     // Выводим основное поле
     for(int i = 0; i < screen.GetLength(0); i++) {
-        Console.Write("│");
+        str = str + '│';
         for(int j = 0; j < screen.GetLength(1); j++) {
-            if (screen[i,j] == 1) Console.Write(c);
-            else Console.Write(" ");
+            if (screen[i,j] == 1) str = str + c;
+            else str = str + ' ';
         }
-        Console.WriteLine("│");
+        str = str + '│' + "\n";
     }
     // Выводим последнюю строку
-    str = "└";
+    str = str + "└";
     for(int i = 0; i < fld.GetLength(1); i++) str = str + "─";
     str = str + "┘";
     Console.WriteLine(str);
@@ -149,7 +148,10 @@ void DeleteReadyLines(int[,] fld, ref int scr) {
                 for(int j1 = 0; j1 < field.GetLength(1); j1++) {
                     fld[i1,j1] = fld[i1 - 1,j1];    
                 }        
-            } 
+            }
+            // Т.к. строки сместили вниз, следующим циклом нада опять проверять
+            // эту строку, а не следующую
+            i--;  
         }
     }    
 }
@@ -165,26 +167,30 @@ while (true) {
     int x = new Random().Next(0,field.GetLength(1) - figure.GetLength(1));
     // Если она достигла дна уже сейчас, значит, игра проиграна
     if (OnTheFloor(field, figure, x, y)) return;
+    // Выводим на экран
+    Print(field, figure, x, y, score, speed);
     // Запускаем цикл перемещения фигуры вниз
     bool isDown = false;
-    while (!isDown) {
-        // Выводим на экран текущее состояние (через каждые 10 циклов, чтобы экран не так сильно мелькал)
-        if (count%10 == 0) Print(field, figure, x, y, score, speed);        
+    while (!isDown) {       
         // Выполняем действия в зависимости от нажатой клавиши
         if (Console.KeyAvailable) {
             ConsoleKey ck = Console.ReadKey(false).Key;
             switch (ck) {
                 case ConsoleKey.UpArrow:        // Стрелка вверх - переворачиваем фигуру        
                     figure = RotateFigure(figure);
+                    Print(field, figure, x, y, score, speed);
                     break;
                 case ConsoleKey.DownArrow:      // Стрелка вниз - спускаемся
                     if (y < field.GetLength(0) - figure.GetLength(0)) y++;
+                    Print(field, figure, x, y, score, speed);
                     break;        
                 case ConsoleKey.LeftArrow:      // Стрелка влево - перемещение влево
                     if (x != 0) x--;
+                    Print(field, figure, x, y, score, speed);
                     break;   
                 case ConsoleKey.RightArrow:     // Стрелка вправо - перемещение вправо
                     if (x < field.GetLength(1) - figure.GetLength(1)) x++;
+                    Print(field, figure, x, y, score, speed);
                     break;        
                 case ConsoleKey.Escape:         // Esc - выход из программы
                     return; 
@@ -197,7 +203,10 @@ while (true) {
             count++;
             // Снижаем позицию фигуры на одну строку (каждый десятый цикл)
             if (y < field.GetLength(0) - figure.GetLength(0)) {
-                if (count%10 == 0) y++;
+                if (count%10 == 0) {
+                    y++;
+                    Print(field, figure, x, y, score, speed);
+                }
             }    
         }
         // Проверяем, достигнуто ли дно
