@@ -1,38 +1,46 @@
 ﻿// Тетрис в консольном исполнении
 
 // Двухмерный массив с текущим полем. Будет заполняться по мере появления фигур
-int[,] field = new int[30,25];
+int[,] workField = new int[30, 25];
 
 // Счет игры
-int score = 0;
+int currentScore = 0;
 
 // Скорость игры 
-int speed = 1;
+int currentSpeed = 1;
+
+// Базовая скорость игры - время такта в мс при speed = 1
+int baseSpeed = 25;
+
+// Смещение игрового поля от левого края - нужен для качественно прорисовки поля
+string leftEmptyString = "          ";  
 
 // Метод, произвольно выбирающий одну из нескольких заданных фигур
-int[,] GetFigure() {
-    // Возможные комбинации фигур
+int[,] GetFigure()
+{
+    // Возможные комбинации фигур. Фигуры можно произвольно менять, в том числе и по размеру
     // ***
     //  *       
-    int[,] f0 = {{1,1,1},{0,1,0}};
+    int[,] f0 = { { 1, 1, 1 }, { 0, 1, 0 } };
     // ***
     //   *       
-    int[,] f1 = {{1,1,1},{0,0,1}};
+    int[,] f1 = { { 1, 1, 1 }, { 0, 0, 1 } };
     // ***
     // *         
-    int[,] f2 = {{1,1,1},{1,0,0}};
+    int[,] f2 = { { 1, 1, 1 }, { 1, 0, 0 } };
     // ****        
-    int[,] f3 = {{1,1,1,1}};   
+    int[,] f3 = { { 1, 1, 1, 1 } };
     // ***        
-    int[,] f4 = {{1,1,1}};
+    int[,] f4 = { { 1, 1, 1 } };
     // **        
-    int[,] f5 = {{1,1}};
+    int[,] f5 = { { 1, 1 } };
     // **
     // **        
-    int[,] f6 = {{1,1},{1,1}};
+    int[,] f6 = { { 1, 1 }, { 1, 1 } };
     // Произвольный номер фигуры
-    int num = new Random().Next(0,7); // [0,6] 
-    switch (num) {
+    int num = new Random().Next(0, 7); // [0,6] 
+    switch (num)
+    {
         case 0: return f0;
         case 1: return f1;
         case 2: return f2;
@@ -46,183 +54,240 @@ int[,] GetFigure() {
 }
 
 // Метод, поворачивающий фигуру
-int[,] RotateFigure(int[,] f) {
-    int[,] result = new int[f.GetLength(1),f.GetLength(0)];
-    for(int i = 0; i < f.GetLength(0); i++) {
-        for(int j = 0; j < f.GetLength(1); j++) {
-            result[j,f.GetLength(0) - i - 1] = f[i,j]; 
+int[,] RotateFigure(int[,] figure)
+{
+    int[,] result = new int[figure.GetLength(1), figure.GetLength(0)];
+    for (int i = 0; i < figure.GetLength(0); i++)
+    {
+        for (int j = 0; j < figure.GetLength(1); j++)
+        {
+            result[j, figure.GetLength(0) - i - 1] = figure[i, j];
         }
     }
     return result;
 }
 
 // Метод, выводящий рабочее поле на экран
-void Print(int[,] fld, int[,] fg, int xPos, int yPos, int scr, int spd) {
+void PrintAllScreen(int[,] field, int screen, int speed)
+{
     // Символ для вывода на экран вместо единички 
     char c = '☺';
-    // Для вывода на экран создаем новый массив, 
-    // объединяющий данные fld и fg 
-    int[,] screen = new int[fld.GetLength(0),fld.GetLength(1)];
-    // Копируем в него массив fld
-    for(int i = 0; i < fld.GetLength(0); i++) {
-        for(int j = 0; j < fld.GetLength(1); j++) {
-            screen[i,j] = fld[i,j];
-        }
-    }
-    // Накладываем на него фигуру
-    // Т.к. массивы содержат 0 или 1, можно использовать логику ИЛИ 
-    for(int i = 0; i < fg.GetLength(0); i++) {
-        for(int j = 0; j < fg.GetLength(1); j++) {
-            screen[yPos + i, xPos + j] = screen[yPos + i, xPos + j] | fg[i, j];
-        }
-    }
     // Очищаем консоль
     Console.Clear();
-    // Выводим первую строку 
-    string str = "┌";
-    for(int i = 0; i < fld.GetLength(1); i++) str = str + "─";
-    str = str + "┐" + $" Счет: {scr} Скорость: {spd} \n";
-    // Выводим основное поле
-    for(int i = 0; i < screen.GetLength(0); i++) {
-        str = str + '│';
-        for(int j = 0; j < screen.GetLength(1); j++) {
-            if (screen[i,j] == 1) str = str + c;
-            else str = str + ' ';
+    // Формируем первую строку 
+    string outString = leftEmptyString + "┌";
+    for (int i = 0; i < field.GetLength(1); i++) outString = outString + "─";
+    outString = outString + "┐" + $" Счет: {screen} Скорость: {speed} \n";
+    // Формируем основное поле
+    for (int i = 0; i < field.GetLength(0); i++)
+    {
+        outString = outString + leftEmptyString + '│';
+        for (int j = 0; j < field.GetLength(1); j++)
+        {
+            if (field[i, j] == 1) outString = outString + c;
+            else outString = outString + ' ';
         }
-        str = str + '│' + "\n";
+        outString = outString + '│' + "\n";
     }
     // Выводим последнюю строку
-    str = str + "└";
-    for(int i = 0; i < fld.GetLength(1); i++) str = str + "─";
-    str = str + "┘";
-    Console.WriteLine(str);
+    outString = outString + leftEmptyString + "└";
+    for (int i = 0; i < field.GetLength(1); i++) outString = outString + "─";
+    outString = outString + "┘";
+    Console.WriteLine(outString);
 }
 
-// Метод, показывающий, что фигура легла на дно
-bool OnTheFloor(int[,] fld, int[,] fg, int xPos, int yPos) {
-    bool result = false;
-    // Просматриваем фигуру построчно, начиная с нижней строки
-    for (int i = fg.GetLength(0) - 1; i >= 0 ;i--) {
-        // Просматриваем каждую точку этой строки
-        for (int j = 0; j < fg.GetLength(1);j++) {
-            // Если эта точка фигуры не пуста, проверяем ее
-            if (fg[i,j] == 1) {
-                // Получаем координату этой точки на общем поле
-                int xOnField = xPos + j;
-                int yOnField = yPos + i;             
-                if (yOnField == fld.GetLength(0) - 1) {
-                    // За этой точкой - нижняя граница, фигура достигла дна
-                    result = true;
-                    break;
-                } 
-                else if (fld[yOnField + 1, xOnField] == 1) {
-                    // За этой точкой - существующая точка на поле
-                    result = true;
-                    break;
-                }
+// Метод, выводящий/убирающий фигуру в заданной позиции экрана
+// show показывает, рисовать фигуру или стирать с экрана
+void PrintFigure(int[,] figure, int xPos, int yPos, bool show)
+{
+    // Символ для вывода на экран вместо единички 
+    char c = '☺';
+    // Просматриваем каждый элемент фигуры
+    for (int i = 0; i < figure.GetLength(0); i++)
+    {
+        for (int j = 0; j < figure.GetLength(1); j++)
+        {
+            // Если элемент существует, в зависимости от show его надо или показать, или закрасить 
+            if (figure[i, j] == 1)
+            {
+                // Устанавливаем курсор с учетом толщины полей и отступа слева
+                Console.SetCursorPosition(xPos + j + leftEmptyString.Length + 1, yPos + i + 1);
+                if (show) Console.WriteLine(c);
+                else Console.WriteLine(" ");
             }
         }
-        // Если точка достигла дна, дальнейшая проверка не нужна
-        if (result) break;            
     }
-    return result;
+}
+
+// Метод, показывающий, что может ли фигура двигаться в указанном направлении
+// Если rotation = 0 - проверяем снизу
+// Если rotation = -1 - проверяем слева
+// Если rotation = 1 - проверяем справа
+bool HasFigureNear(int[,] field, int[,] figure, int xPos, int yPos, int rotation = 0)
+{
+    // Просматриваем фигуру построчно, начиная с нижней строки
+    for (int i = figure.GetLength(0) - 1; i >= 0; i--)
+    {
+        // Просматриваем каждую точку этой строки
+        for (int j = 0; j < figure.GetLength(1); j++)
+        {
+            // Если эта точка фигуры не пуста, проверяем ее
+            if (figure[i, j] == 1)
+            {
+                // Получаем координату этой точки на общем поле
+                int xOnField = xPos + j;
+                int yOnField = yPos + i;
+                // Получаем координаты интресующей соседней точки
+                int secondPointX = xOnField + rotation;
+                int secondPointY = yOnField + (rotation == 0 ? 1 : 0);
+                // Проверяем, не нарушила ли точка границу
+                bool onBorder = (rotation == 0 && secondPointY == field.GetLength(0))
+                                || (rotation == -1 && secondPointX == -1)
+                                || (rotation == 1 && secondPointX == field.GetLength(1));
+                // Если нарушена граница или данная точка в рабочем поле знанята, выдаем true
+                if (onBorder || (!onBorder && field[secondPointY, secondPointX] == 1)) return true;
+            }
+        }
+    }
+    return false;
 }
 
 // Метод, убирающий лишние строки и меняющий счет
-void DeleteReadyLines(int[,] fld, ref int scr) {
+void DeleteReadyLines(int[,] field, ref int score)
+{
     // Просматриваем построчно снизу
-    bool isReady = true;
-    for(int i = field.GetLength(0) - 1; i >= 0; i--) {
-        for(int j = 0; j < field.GetLength(1); j++) {
-            if (field[i, j] == 0) {
+    for (int i = 0; i < workField.GetLength(0); i++)
+    {
+        // Определям, собрана ли данная строка
+        bool isReady = true;    
+        for (int j = 0; j < workField.GetLength(1); j++)
+        {
+            if (workField[i, j] == 0)
+            {
                 isReady = false;
                 break;
             }
         }
         // Если данная строка собрана, ее надо убрать
-        if (isReady) {
+        if (isReady)
+        {
             // Увеличиваем счет
-            scr++;
+            score++;
             // Смещаем содержимое рабочего поля вниз
-            for(int i1 = i; i1 > 0; i1--) {
-                for(int j1 = 0; j1 < field.GetLength(1); j1++) {
-                    fld[i1,j1] = fld[i1 - 1,j1];    
-                }        
+            for (int i1 = i; i1 > 0; i1--)
+            {
+                for (int j1 = 0; j1 < workField.GetLength(1); j1++)
+                {
+                    field[i1, j1] = field[i1 - 1, j1];
+                }
             }
-            // Т.к. строки сместили вниз, следующим циклом нада опять проверять
-            // эту строку, а не следующую
-            i--;  
         }
-    }    
+    }
 }
 
+// ОСНОВНАЯ ПРОГРАММА
+Console.CursorVisible = false;
+// Выводим первоначальный экран
+PrintAllScreen(workField, currentScore, currentSpeed);
 // Запускаем основной цикл программы
-while (true) {
+while (true)
+{
     // Счетчик циклов - для плавности работы программы
     int count = 0;
     // Формируем фигуру
-    int[,] figure = GetFigure();
+    int[,] currentFigure = GetFigure();
     // Задаем ей начальное значение вверху экрана
     int y = 0;
-    int x = new Random().Next(0,field.GetLength(1) - figure.GetLength(1));
+    int x = new Random().Next(0, workField.GetLength(1) - currentFigure.GetLength(1));
+    // Выводим на экран 
+    PrintFigure(currentFigure, x, y, true);
     // Если она достигла дна уже сейчас, значит, игра проиграна
-    if (OnTheFloor(field, figure, x, y)) return;
-    // Выводим на экран
-    Print(field, figure, x, y, score, speed);
+    if (HasFigureNear(workField, currentFigure, x, y))
+    {
+        Console.Clear();
+        return;
+    }
     // Запускаем цикл перемещения фигуры вниз
     bool isDown = false;
-    while (!isDown) {       
+    while (!isDown)
+    {
         // Выполняем действия в зависимости от нажатой клавиши
-        if (Console.KeyAvailable) {
-            ConsoleKey ck = Console.ReadKey(false).Key;
-            switch (ck) {
+        if (Console.KeyAvailable)
+        {
+            ConsoleKey ck = Console.ReadKey().Key;
+            switch (ck)
+            {
                 case ConsoleKey.UpArrow:        // Стрелка вверх - переворачиваем фигуру        
-                    figure = RotateFigure(figure);
-                    Print(field, figure, x, y, score, speed);
+                    PrintFigure(currentFigure, x, y, false);
+                    currentFigure = RotateFigure(currentFigure);
+                    PrintFigure(currentFigure, x, y, true);
                     break;
                 case ConsoleKey.DownArrow:      // Стрелка вниз - спускаемся
-                    if (y < field.GetLength(0) - figure.GetLength(0)) y++;
-                    Print(field, figure, x, y, score, speed);
-                    break;        
+                    if (!HasFigureNear(workField, currentFigure, x, y + 1))
+                    {
+                        PrintFigure(currentFigure, x, y, false);
+                        y++;
+                        PrintFigure(currentFigure, x, y, true);
+                    }
+                    break;
                 case ConsoleKey.LeftArrow:      // Стрелка влево - перемещение влево
-                    if (x != 0) x--;
-                    Print(field, figure, x, y, score, speed);
-                    break;   
+                    if (!HasFigureNear(workField, currentFigure, x, y, -1))
+                    {
+                        PrintFigure(currentFigure, x, y, false);
+                        x--;
+                        PrintFigure(currentFigure, x, y, true);
+                    }
+                    break;
                 case ConsoleKey.RightArrow:     // Стрелка вправо - перемещение вправо
-                    if (x < field.GetLength(1) - figure.GetLength(1)) x++;
-                    Print(field, figure, x, y, score, speed);
-                    break;        
+                    if (!HasFigureNear(workField, currentFigure, x, y, 1))
+                    {
+                        PrintFigure(currentFigure, x, y, false);
+                        x++;
+                        PrintFigure(currentFigure, x, y, true);
+                    } 
+                    break;
                 case ConsoleKey.Escape:         // Esc - выход из программы
-                    return; 
+                    Console.Clear();
+                    return;
             }
-        } else {
+        }
+        else
+        {
             // Никакие клавиши не нажимались
             // Делаем задержку времени, зависящую от скорости
-            await Task.Delay(25/speed);
+            await Task.Delay(baseSpeed / currentSpeed);
             // Увеличиваем счетчик циклов
             count++;
             // Снижаем позицию фигуры на одну строку (каждый десятый цикл)
-            if (y < field.GetLength(0) - figure.GetLength(0)) {
-                if (count%10 == 0) {
+            if (y < workField.GetLength(0) - currentFigure.GetLength(0))
+            {
+                if (count % 10 == 0)
+                {
+                    PrintFigure(currentFigure, x, y, false);
                     y++;
-                    Print(field, figure, x, y, score, speed);
+                    PrintFigure(currentFigure, x, y, true);
                 }
-            }    
+            }
         }
         // Проверяем, достигнуто ли дно
-        isDown = OnTheFloor(field, figure, x, y);
-        // Если дно достигнуто
-        if (isDown) {
+        isDown = HasFigureNear(workField, currentFigure, x, y);
+        // Если достигнуто дно
+        if (isDown)
+        {
             // То фигуру надо оставить на дне
-            for(int i = 0; i < figure.GetLength(0); i++) {
-                for(int j = 0; j < figure.GetLength(1); j++) {
-                    field[y + i, x + j] = field[y + i, x + j] | figure[i, j];
+            for (int i = 0; i < currentFigure.GetLength(0); i++)
+            {
+                for (int j = 0; j < currentFigure.GetLength(1); j++)
+                {
+                    workField[y + i, x + j] = workField[y + i, x + j] | currentFigure[i, j];
                 }
             }
             // Проверить, а не появились ли какие готовые строки
-            DeleteReadyLines(field, ref score);
+            DeleteReadyLines(workField, ref currentScore);
             // Изменяем скорость в зависимости от результата
-            speed = 1 + score/10; 
+            currentSpeed = 1 + currentScore / 10;
+            // Перерисоввываем основное поле
+            PrintAllScreen(workField, currentScore, currentSpeed);
         }
     }
 }
