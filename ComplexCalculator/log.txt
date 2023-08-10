@@ -1,0 +1,8 @@
+авг. 10, 2023 8:15:37 AM CalculatorLogger log
+INFO: (1,000+j1,000)/(2,000+j2,000) = 0,500
+авг. 10, 2023 8:18:46 AM CalculatorLogger log
+INFO: (5,000-j8,000)+(8,000+j7,000) = 13,000-j1,000
+авг. 10, 2023 8:19:00 AM CalculatorLogger log
+INFO: (1,000+j3,000)*(5,000-j9,000) = 32,000+j6,000
+авг. 10, 2023 8:20:41 AM CalculatorLogger log
+INFO: (1,000+j1,000)*(1,000-j1,000) = 2,000
